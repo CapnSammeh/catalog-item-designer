@@ -8,6 +8,8 @@ A browser-based drag-and-drop designer for building [Servicely](https://servicel
 
 The Catalog Item Designer lets Servicely administrators and solution architects visually compose catalog item forms before building them in the platform. Drag fields onto a canvas, organise them into sections, configure labels and options, annotate each field with implementation notes, then preview the result as an end user would see it.
 
+You can also use **Claude AI to generate designs for you** via MCP — describe the form you want and Claude returns ready-to-import JSON.
+
 ---
 
 ## Features
@@ -19,9 +21,10 @@ The Catalog Item Designer lets Servicely administrators and solution architects 
 | **Sections** | Group fields under named section headers. Add, rename, reorder, and delete sections. |
 | **Field config** | Per-field label, help text, required toggle, and type-specific options (choice options list, reference table name, HTML content, acknowledgement statement). |
 | **Notes** | Annotate any field with implementation notes — logic, business rules, data sources. Toggle notes on/off globally. |
-| **Preview mode** | Switch to a live, interactive preview that renders the form exactly as Servicely users would see it. |
+| **Preview mode** | Switch to a live, interactive preview that renders the form exactly as Servicely users would see it. Fields are fully interactive. |
 | **Notes flyover** | In preview mode, a flyover sidebar lists every annotated field and its notes without affecting the form layout. |
 | **Import / Export** | Download the full catalog item definition (layout, config, and notes) as a `.json` file. Upload it again on any device to continue editing. |
+| **Use with Claude** | Generate designs using Claude AI via MCP — one-click setup from the header. |
 
 ---
 
@@ -32,7 +35,7 @@ The Catalog Item Designer lets Servicely administrators and solution architects 
 The app is hosted on GitHub Pages — no install needed:
 
 ```
-https://<your-org>.github.io/catalog-item-designer/
+https://CapnSammeh.github.io/catalog-item-designer/
 ```
 
 ### Run locally
@@ -40,7 +43,7 @@ https://<your-org>.github.io/catalog-item-designer/
 Requires Node.js 18+.
 
 ```bash
-git clone https://github.com/<your-org>/catalog-item-designer.git
+git clone https://github.com/CapnSammeh/catalog-item-designer.git
 cd catalog-item-designer
 npm install
 npm run dev
@@ -75,22 +78,41 @@ Click any field card on the canvas to open the config panel on the right:
 - **Config tab** — set the label, help text, required toggle, and type-specific options
 - **Notes tab** — write free-form implementation notes for your team (logic, data sources, business rules)
 
+A small amber dot on a field card indicates it has notes attached.
+
 ### 4. Organise into sections
 
 Click **+ Add Section** in the palette sidebar to add a new section. Drag the ⠿ handle to reorder sections. Click a section title to rename it inline.
 
 ### 5. Preview
 
-Click **Preview** in the header to see the form as an end user would. All fields are interactive — you can fill them in to validate the flow. Click **Exit Preview** to return to the editor.
+Click **Preview** in the header to see the form as an end user would. All fields are fully interactive — fill them in to validate the flow. Click **Exit Preview** to return to the editor.
 
-### 6. Notes overlay
+### 6. Notes
 
-Toggle **Notes on/off** (amber button in the header) at any time — in both editor and preview modes. In preview, a flyover panel slides in from the right listing every annotated field and its notes.
+Toggle **Notes on/off** (amber button in the header) at any time — works in both editor and preview modes.
+
+- **In the editor** — notes appear as an amber block inside each field card.
+- **In preview** — a flyover panel slides in from the right, listing every annotated field and its notes without affecting the form layout.
 
 ### 7. Export & Import
 
 - **Export** — downloads the current design as `<item-name>.json`
 - **Import** — opens a file picker to load a previously exported `.json` and restore the full design
+
+---
+
+## Use with Claude (MCP)
+
+Claude can generate complete catalog item designs for you from a plain-English description. Click **Use with Claude** in the header for setup instructions — it takes about a minute.
+
+Once connected, prompt Claude like this:
+
+> *Using the catalog-designer MCP, generate a catalog item for an employee onboarding request with sections for personal details, equipment, and system access. Return it as JSON I can import.*
+
+Claude reads the schema from this repo via [gitmcp.io](https://gitmcp.io) and returns a valid, ready-to-import JSON design.
+
+**MCP endpoint:** `https://gitmcp.io/CapnSammeh/catalog-item-designer`
 
 ---
 
@@ -156,6 +178,7 @@ The exported `.json` is a plain object you can inspect, version-control, or hand
 | Drag & drop | [@dnd-kit/core](https://dndkit.com) + @dnd-kit/sortable |
 | Styling | Tailwind CSS v4 |
 | State | [Zustand](https://zustand-demo.pmnd.rs) |
+| AI integration | [gitmcp.io](https://gitmcp.io) — exposes this repo as an MCP server for Claude |
 | Hosting | GitHub Pages |
 
 ---

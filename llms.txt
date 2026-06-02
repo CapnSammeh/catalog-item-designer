@@ -192,8 +192,7 @@ Fields are always owned by a section. Every catalog item must have at least one 
 
 ## How to import
 
-1. Copy the generated JSON
-2. Open the Catalog Item Designer
-3. Click **Import** in the header
-4. Select a `.json` file — or save the JSON to a file first with a `.json` extension
-5. The design loads immediately, ready to edit and preview
+Return the JSON as a fenced code block. The user will copy it, save it as a `.json` file, then click **Import** in the Catalog Item Designer header to load it.
+
+**Live app:** https://CapnSammeh.github.io/catalog-item-designer/
+**Repo:** https://github.com/CapnSammeh/catalog-item-designer

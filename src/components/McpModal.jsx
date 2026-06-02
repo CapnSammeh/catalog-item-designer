@@ -49,7 +49,9 @@ function deriveUrls(repoUrl) {
 }
 
 export default function McpModal({ onClose }) {
-  const [repoUrl, setRepoUrl] = useState('')
+  const [repoUrl, setRepoUrl] = useState(
+    import.meta.env.VITE_GITHUB_REPO_URL ?? ''
+  )
   const derived = repoUrl.includes('github.com') ? deriveUrls(repoUrl) : null
 
   return (
@@ -72,60 +74,30 @@ export default function McpModal({ onClose }) {
         {/* Body */}
         <div className="flex flex-col gap-5 p-5 overflow-y-auto">
 
-          {/* Step 1 */}
+            {/* Step 1 — MCP config */}
           <div className="flex gap-3">
             <div className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700 mb-1">Push this repo to GitHub</p>
-              <CodeBlock code={`git init && git add .\ngit commit -m "Initial commit"\ngh repo create catalog-item-designer --public --push`} />
+              <p className="text-sm font-medium text-gray-700 mb-1">Add to Claude's MCP config</p>
+              <p className="text-xs text-gray-500 mb-2">
+                Add this to <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">~/.claude/settings.json</code> or run{' '}
+                <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">/mcp</code> inside Claude Code.
+              </p>
+              <CodeBlock code={derived.config} />
             </div>
           </div>
 
-          {/* Step 2 */}
+          {/* Step 2 — prompt */}
           <div className="flex gap-3">
             <div className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700 mb-1">Enter your GitHub repo URL</p>
-              <input
-                className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 outline-none focus:border-blue-400"
-                placeholder="https://github.com/your-username/catalog-item-designer"
-                value={repoUrl}
-                onChange={(e) => setRepoUrl(e.target.value)}
-              />
-              {repoUrl && !derived && (
-                <p className="text-xs text-red-500 mt-1">Doesn't look like a GitHub URL — try https://github.com/username/repo</p>
-              )}
+              <p className="text-sm font-medium text-gray-700 mb-2">Ask Claude to generate a design</p>
+              <CodeBlock code={`Using the catalog-designer MCP, generate a catalog item for [describe your form]. Return it as JSON I can import.`} />
+              <p className="text-xs text-gray-400 mt-2">
+                Claude will read the schema from your repo and return a ready-to-import JSON design.
+              </p>
             </div>
           </div>
-
-          {/* Step 3 — shown once URL is valid */}
-          {derived && (
-            <div className="flex gap-3">
-              <div className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-700 mb-1">Add to Claude's MCP config</p>
-                <p className="text-xs text-gray-500 mb-2">
-                  Add this to <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">~/.claude/settings.json</code> or run{' '}
-                  <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">/mcp</code> inside Claude Code.
-                </p>
-                <CodeBlock code={derived.config} />
-              </div>
-            </div>
-          )}
-
-          {/* Step 4 */}
-          {derived && (
-            <div className="flex gap-3">
-              <div className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">4</div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-700 mb-2">Ask Claude to generate a design</p>
-                <CodeBlock code={`Using the catalog-designer MCP, generate a catalog item for [describe your form]. Return it as JSON I can import.`} />
-                <p className="text-xs text-gray-400 mt-2">
-                  Claude will read the schema from your repo and return a ready-to-import JSON design.
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* Divider + gitmcp link */}
           <div className="border-t border-gray-100 pt-3 flex items-center justify-between">

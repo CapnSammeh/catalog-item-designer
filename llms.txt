@@ -1,0 +1,199 @@
+# Catalog Item Designer
+
+A drag-and-drop SPWA for designing Servicely Service Catalog Items. Users compose forms visually; the result can be exported as JSON and imported into Servicely.
+
+## Primary task for AI assistants
+
+Generate a valid catalog item design as JSON, based on the user's description of the form they want to build. Return the JSON directly — the user will paste it into the Import dialog in the designer.
+
+---
+
+## JSON schema
+
+A design file is a single `CatalogItem` object.
+
+### CatalogItem
+
+```json
+{
+  "id": "<uuid-v4>",
+  "name": "Human-readable name of the catalog item",
+  "description": "One-sentence description shown below the title",
+  "category": "Optional category string",
+  "sections": [ ...Section ]
+}
+```
+
+### Section
+
+Fields are always owned by a section. Every catalog item must have at least one section.
+
+```json
+{
+  "id": "<uuid-v4>",
+  "title": "Section heading shown to the user",
+  "fields": [ ...Field ]
+}
+```
+
+### Field
+
+```json
+{
+  "id": "<uuid-v4>",
+  "type": "<field type key — see table below>",
+  "label": "Question label shown to the user",
+  "helpText": "Optional hint shown below the label",
+  "required": true,
+  "typeConfig": { },
+  "notes": "Optional implementation notes for the developer building this in Servicely"
+}
+```
+
+### typeConfig per field type
+
+| type | typeConfig shape |
+|---|---|
+| `string` | `{}` |
+| `text` | `{}` |
+| `integer` | `{}` |
+| `decimal` | `{}` |
+| `money` | `{}` |
+| `boolean` | `{}` |
+| `date` | `{}` |
+| `datetime` | `{}` |
+| `choice` | `{ "options": ["Option A", "Option B", ...] }` |
+| `reference` | `{ "table": "servicely_table_name" }` |
+| `multi_reference` | `{ "table": "servicely_table_name" }` |
+| `html` | `{ "content": "<p>HTML string</p>" }` |
+| `acknowledgement` | `{ "statementText": "I acknowledge that..." }` |
+
+---
+
+## Field type reference
+
+| type key | Display name | Use for |
+|---|---|---|
+| `string` | String | Single-line free text |
+| `text` | Text | Multi-line free text |
+| `integer` | Integer | Whole numbers |
+| `decimal` | Decimal | Decimal numbers |
+| `money` | Money | Currency values |
+| `boolean` | Boolean | True / False |
+| `date` | Date | Date picker |
+| `datetime` | Date and Time | Date + time picker |
+| `choice` | Choice | Select from a list |
+| `reference` | Reference | Single Servicely record lookup |
+| `multi_reference` | Multiple Reference | Multi Servicely record lookup |
+| `html` | HTML | Read-only display text / instructions |
+| `acknowledgement` | Acknowledgement | Must-accept checkbox |
+
+---
+
+## Rules
+
+- Every `id` must be a valid UUID v4 (e.g. `"a1b2c3d4-e5f6-4789-abcd-ef1234567890"`). Generate a unique one for each object.
+- `required` is a boolean — default to `false` unless the field is clearly mandatory.
+- `typeConfig` must always be present; use `{}` for types that have no options.
+- `notes` should describe implementation detail — where data comes from, business rules, dependencies between fields. Leave as `""` if nothing relevant.
+- Sections group related fields. Use a single section titled `"General"` if grouping is not specified.
+- `choice` options should be realistic values, not placeholders, when the context makes them clear.
+
+---
+
+## Example — complete catalog item
+
+```json
+{
+  "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "name": "Request New Laptop",
+  "description": "Submit a request for a new laptop for yourself or a team member.",
+  "category": "Hardware",
+  "sections": [
+    {
+      "id": "b5d6e7f8-1234-4abc-9def-0a1b2c3d4e5f",
+      "title": "Requestor",
+      "fields": [
+        {
+          "id": "c1d2e3f4-5678-4bcd-aef0-1a2b3c4d5e6f",
+          "type": "reference",
+          "label": "Who is this laptop for?",
+          "helpText": "Search for the employee by name.",
+          "required": true,
+          "typeConfig": { "table": "sys_user" },
+          "notes": "Reference the sys_user table. Default to the currently logged-in user."
+        },
+        {
+          "id": "d2e3f4a5-6789-4cde-bf01-2b3c4d5e6f7a",
+          "type": "string",
+          "label": "Cost centre",
+          "helpText": "Enter the cost centre code to charge this request to.",
+          "required": true,
+          "typeConfig": {},
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "e3f4a5b6-7890-4def-c012-3c4d5e6f7a8b",
+      "title": "Device",
+      "fields": [
+        {
+          "id": "f4a5b6c7-8901-4ef0-d123-4d5e6f7a8b9c",
+          "type": "choice",
+          "label": "Operating system",
+          "helpText": "",
+          "required": true,
+          "typeConfig": { "options": ["macOS", "Windows 11", "Linux"] },
+          "notes": ""
+        },
+        {
+          "id": "a5b6c7d8-9012-4f01-e234-5e6f7a8b9c0d",
+          "type": "choice",
+          "label": "Size",
+          "helpText": "Screen size preference.",
+          "required": false,
+          "typeConfig": { "options": ["13\"", "14\"", "16\""] },
+          "notes": ""
+        },
+        {
+          "id": "b6c7d8e9-0123-4012-f345-6f7a8b9c0d1e",
+          "type": "text",
+          "label": "Additional requirements",
+          "helpText": "Any specific hardware needs, accessibility requirements, or software to pre-install.",
+          "required": false,
+          "typeConfig": {},
+          "notes": "Free text — pass through to the procurement team as-is."
+        }
+      ]
+    },
+    {
+      "id": "c7d8e9f0-1234-4123-0456-7a8b9c0d1e2f",
+      "title": "Approval",
+      "fields": [
+        {
+          "id": "d8e9f0a1-2345-4234-1567-8b9c0d1e2f3a",
+          "type": "acknowledgement",
+          "label": "",
+          "helpText": "",
+          "required": true,
+          "typeConfig": {
+            "statementText": "I confirm this request has been approved by my line manager and the cost centre owner."
+          },
+          "notes": "Approval gate — form cannot be submitted without this checked."
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## How to import
+
+1. Copy the generated JSON
+2. Open the Catalog Item Designer
+3. Click **Import** in the header
+4. Select a `.json` file — or save the JSON to a file first with a `.json` extension
+5. The design loads immediately, ready to edit and preview

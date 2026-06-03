@@ -1,5 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { GripVertical, Trash2, CircleDot } from 'lucide-react'
 import { FIELD_TYPE_MAP } from '../fieldTypes'
 import { useStore } from '../store'
 
@@ -16,7 +17,8 @@ export default function FieldCard({ field, sectionId }) {
     opacity: isDragging ? 0.4 : 1,
   }
 
-  const typeMeta = FIELD_TYPE_MAP[field.type] ?? { label: field.type, icon: '?' }
+  const typeMeta = FIELD_TYPE_MAP[field.type] ?? { label: field.type, Icon: CircleDot }
+  const TypeIcon = typeMeta.Icon
 
   return (
     <div
@@ -37,12 +39,12 @@ export default function FieldCard({ field, sectionId }) {
         className="mt-0.5 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing shrink-0"
         aria-label="Drag to reorder"
       >
-        ⠿
+        <GripVertical size={14} />
       </button>
 
-      {/* type badge */}
-      <span className="shrink-0 text-xs font-mono bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded mt-0.5">
-        {typeMeta.icon}
+      {/* type icon badge */}
+      <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-500 mt-0.5">
+        <TypeIcon size={13} />
       </span>
 
       {/* content */}
@@ -63,19 +65,16 @@ export default function FieldCard({ field, sectionId }) {
 
       {/* notes indicator */}
       {field.notes && (
-        <span
-          className="shrink-0 mt-1 w-1.5 h-1.5 rounded-full bg-amber-400"
-          title="Has notes"
-        />
+        <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" title="Has notes" />
       )}
 
       {/* delete */}
       <button
         onClick={(e) => { e.stopPropagation(); deleteField(sectionId, field.id) }}
-        className="shrink-0 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity mt-0.5"
+        className="shrink-0 opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-opacity mt-0.5"
         aria-label="Delete field"
       >
-        🗑
+        <Trash2 size={14} />
       </button>
     </div>
   )

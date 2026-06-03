@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { GripVertical, Trash2 } from 'lucide-react'
 import FieldCard from './FieldCard'
 import { useStore } from '../store'
 
@@ -21,7 +22,7 @@ function SectionHeader({ section }) {
         className="text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing"
         aria-label="Drag section"
       >
-        ⠿
+        <GripVertical size={14} />
       </button>
       <input
         className="flex-1 text-sm font-semibold text-gray-700 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-400 outline-none py-0.5"
@@ -32,10 +33,10 @@ function SectionHeader({ section }) {
       {canDelete && (
         <button
           onClick={() => deleteSection(section.id)}
-          className="text-gray-300 hover:text-red-400 transition-colors text-sm"
+          className="text-gray-300 hover:text-red-400 transition-colors"
           aria-label="Delete section"
         >
-          🗑
+          <Trash2 size={13} />
         </button>
       )}
     </div>

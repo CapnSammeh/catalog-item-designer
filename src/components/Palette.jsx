@@ -24,7 +24,7 @@ function PaletteItem({ type }) {
         isDragging ? 'opacity-40' : ''
       }`}
     >
-      <span className="w-6 text-center text-xs text-gray-400 font-mono">{type.icon}</span>
+      <type.Icon size={14} className="shrink-0 text-gray-400" />
       {type.label}
     </div>
   )

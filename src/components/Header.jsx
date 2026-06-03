@@ -1,6 +1,9 @@
 import { useState } from 'react'
+import { Upload, Download, HelpCircle, Bug, Eye, EyeOff, Layers } from 'lucide-react'
 import { useStore } from '../store'
 import McpModal from './McpModal'
+
+const ISSUES_URL = 'https://github.com/CapnSammeh/catalog-item-designer/issues/new/choose'
 
 export default function Header({ onHelp }) {
   const { item, updateItem, previewMode, togglePreview, showNotes, toggleShowNotes, exportJSON, importJSON } = useStore()
@@ -20,18 +23,23 @@ export default function Header({ onHelp }) {
 
   return (
     <>
-      <header className="flex items-center gap-4 px-6 py-3 bg-white border-b border-gray-200 shadow-sm">
+      <header className="flex items-center gap-3 px-6 py-3 bg-white border-b border-gray-200 shadow-sm">
+        {/* Brand */}
         <span className="text-sm font-semibold text-gray-400 tracking-wide uppercase shrink-0">
           Catalog Designer
         </span>
         <button
           onClick={onHelp}
-          className="shrink-0 w-6 h-6 rounded-full border border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 text-xs font-semibold flex items-center justify-center transition-colors"
+          className="shrink-0 text-gray-400 hover:text-blue-500 transition-colors"
           aria-label="Help"
+          title="Help"
         >
-          ?
+          <HelpCircle size={16} />
         </button>
+
         <div className="w-px h-5 bg-gray-200" />
+
+        {/* Item name */}
         <input
           className="flex-1 text-sm font-medium text-gray-800 bg-transparent border-none outline-none min-w-0 placeholder-gray-400"
           value={item.name}
@@ -39,7 +47,7 @@ export default function Header({ onHelp }) {
           placeholder="Catalog item name…"
         />
 
-        {/* hidden file input for import */}
+        {/* hidden file input */}
         <input
           id="import-file"
           type="file"
@@ -48,35 +56,37 @@ export default function Header({ onHelp }) {
           onChange={handleImport}
         />
 
+        {/* Import / Export */}
         <button
           onClick={() => document.getElementById('import-file').click()}
-          className="shrink-0 px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          title="Import design from JSON"
         >
-          Import
+          <Upload size={13} /> Import
         </button>
         <button
           onClick={exportJSON}
-          className="shrink-0 px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          title="Export design as JSON"
         >
-          Export
+          <Download size={13} /> Export
         </button>
 
         <div className="w-px h-5 bg-gray-200" />
 
+        {/* Use with Claude */}
         <button
           onClick={() => setShowMcp(true)}
           className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
+          title="Connect Claude AI via MCP"
         >
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-            <path d="M2 17l10 5 10-5"/>
-            <path d="M2 12l10 5 10-5"/>
-          </svg>
+          <Layers size={13} />
           Use with Claude
         </button>
 
         <div className="w-px h-5 bg-gray-200" />
 
+        {/* Notes toggle */}
         <button
           onClick={toggleShowNotes}
           className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
@@ -84,20 +94,36 @@ export default function Header({ onHelp }) {
               ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
               : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
           }`}
+          title={showNotes ? 'Hide notes' : 'Show notes'}
         >
           <span className="w-2 h-2 rounded-full bg-current opacity-70" />
           {showNotes ? 'Notes on' : 'Notes off'}
         </button>
+
+        {/* Preview */}
         <button
           onClick={togglePreview}
-          className={`shrink-0 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+          className={`shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
             previewMode
               ? 'bg-blue-600 text-white hover:bg-blue-700'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          {previewMode ? 'Exit Preview' : 'Preview'}
+          {previewMode ? <><EyeOff size={13} /> Exit Preview</> : <><Eye size={13} /> Preview</>}
         </button>
+
+        <div className="w-px h-5 bg-gray-200" />
+
+        {/* Report a bug */}
+        <a
+          href={ISSUES_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+          title="Submit a bug or feature request"
+        >
+          <Bug size={13} /> Feedback
+        </a>
       </header>
 
       {showMcp && <McpModal onClose={() => setShowMcp(false)} />}

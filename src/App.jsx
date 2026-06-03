@@ -15,12 +15,21 @@ import Palette from './components/Palette'
 import Canvas from './components/Canvas'
 import ConfigPanel from './components/ConfigPanel'
 import Preview from './components/Preview'
+import SplashScreen from './components/SplashScreen'
 import './index.css'
+
+const SPLASH_KEY = 'catalog-designer-splash-seen'
 
 export default function App() {
   const previewMode = useStore((s) => s.previewMode)
   const { item, addField, reorderFields, reorderSections } = useStore()
   const [activeDrag, setActiveDrag] = useState(null)
+  const [showSplash, setShowSplash] = useState(() => !localStorage.getItem(SPLASH_KEY))
+
+  function closeSplash() {
+    localStorage.setItem(SPLASH_KEY, '1')
+    setShowSplash(false)
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -99,8 +108,9 @@ export default function App() {
   if (previewMode) {
     return (
       <div className="flex flex-col h-screen overflow-hidden">
-        <Header />
+        <Header onHelp={() => setShowSplash(true)} />
         <Preview />
+        {showSplash && <SplashScreen onClose={closeSplash} />}
       </div>
     )
   }
@@ -115,13 +125,15 @@ export default function App() {
       onDragEnd={handleDragEnd}
     >
       <div className="flex flex-col h-screen overflow-hidden">
-        <Header />
+        <Header onHelp={() => setShowSplash(true)} />
         <div className="flex flex-1 overflow-hidden">
           <Palette />
           <Canvas sectionSortIds={sectionSortIds} isPaletteDragging={isPaletteDragging} />
           <ConfigPanel />
         </div>
       </div>
+
+      {showSplash && <SplashScreen onClose={closeSplash} />}
 
       <DragOverlay dropAnimation={null}>
         {isPaletteDragging && (

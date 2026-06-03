@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useStore } from '../store'
 import McpModal from './McpModal'
 
-export default function Header() {
+export default function Header({ onHelp }) {
   const { item, updateItem, previewMode, togglePreview, showNotes, toggleShowNotes, exportJSON, importJSON } = useStore()
   const [showMcp, setShowMcp] = useState(false)
 
@@ -24,6 +24,13 @@ export default function Header() {
         <span className="text-sm font-semibold text-gray-400 tracking-wide uppercase shrink-0">
           Catalog Designer
         </span>
+        <button
+          onClick={onHelp}
+          className="shrink-0 w-6 h-6 rounded-full border border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 text-xs font-semibold flex items-center justify-center transition-colors"
+          aria-label="Help"
+        >
+          ?
+        </button>
         <div className="w-px h-5 bg-gray-200" />
         <input
           className="flex-1 text-sm font-medium text-gray-800 bg-transparent border-none outline-none min-w-0 placeholder-gray-400"

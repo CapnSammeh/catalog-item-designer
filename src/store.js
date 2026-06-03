@@ -64,6 +64,8 @@ export const useStore = create((set, get) => ({
       required: false,
       typeConfig: {},
       notes: '',
+      displayRule: { type: 'always', logic: 'all', conditions: [] },
+      readonlyRule: { type: 'never', logic: 'all', conditions: [] },
     }
     set((s) => ({
       item: {

@@ -1,8 +1,14 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Trash2, CircleDot } from 'lucide-react'
+import { GripVertical, Trash2, CircleDot, GitBranch } from 'lucide-react'
 import { FIELD_TYPE_MAP } from '../fieldTypes'
 import { useStore } from '../store'
+
+function hasConditions(field) {
+  const d = field.displayRule
+  const r = field.readonlyRule
+  return (d && d.type !== 'always') || (r && r.type !== 'never')
+}
 
 export default function FieldCard({ field, sectionId }) {
   const { selectedFieldId, selectField, deleteField, showNotes } = useStore()
@@ -62,6 +68,13 @@ export default function FieldCard({ field, sectionId }) {
           </p>
         )}
       </div>
+
+      {/* conditions indicator */}
+      {hasConditions(field) && (
+        <span className="shrink-0 mt-1 text-blue-400" title="Has conditions">
+          <GitBranch size={11} />
+        </span>
+      )}
 
       {/* notes indicator */}
       {field.notes && (

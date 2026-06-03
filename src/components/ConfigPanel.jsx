@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../store'
 import { FIELD_TYPE_MAP } from '../fieldTypes'
+import ConditionsPanel from './ConditionsPanel'
 
 function ChoiceOptions({ options = [], onChange }) {
   const add = () => onChange([...options, ''])
@@ -136,7 +137,7 @@ export default function ConfigPanel() {
 
       {/* Tabs */}
       <div className="flex border-b border-gray-200 shrink-0">
-        {['config', 'notes'].map((t) => (
+        {['config', 'conditions', 'notes'].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -185,6 +186,17 @@ export default function ConfigPanel() {
           </label>
 
           <TypeConfig field={field} sectionId={selectedSectionId} />
+        </div>
+      )}
+
+      {/* Conditions tab */}
+      {tab === 'conditions' && (
+        <div className="flex flex-col gap-4 p-4 overflow-y-auto">
+          <ConditionsPanel
+            field={field}
+            sectionId={selectedSectionId}
+            allFields={item.sections.flatMap((s) => s.fields)}
+          />
         </div>
       )}
 

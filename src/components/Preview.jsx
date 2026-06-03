@@ -1,79 +1,89 @@
+import { useState } from 'react'
 import { useStore } from '../store'
+import { evalField } from '../conditions'
 
-function FieldInput({ field }) {
-  const base = 'w-full text-sm border border-gray-300 rounded px-3 py-2 bg-white outline-none'
+function FieldInput({ field, value, onChange, readOnly }) {
+  const base = `w-full text-sm border rounded px-3 py-2 outline-none transition-colors ${
+    readOnly
+      ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed'
+      : 'border-gray-300 bg-white focus:border-blue-400'
+  }`
+
+  const ro = readOnly ? { readOnly: true, tabIndex: -1 } : {}
+  const handle = (setter) => readOnly ? {} : { onChange: (e) => setter(e.target.value) }
 
   switch (field.type) {
     case 'string':
-      return <input className={base} type="text" placeholder=" " />
+      return <input className={base} type="text" value={value ?? ''} {...handle(onChange)} {...ro} placeholder=" " />
     case 'text':
-      return <textarea className={`${base} resize-none`} rows={3} />
+      return <textarea className={`${base} resize-none`} rows={3} value={value ?? ''} {...handle(onChange)} {...ro} />
     case 'integer':
     case 'decimal':
     case 'money':
-      return <input className={base} type="number" />
+      return <input className={base} type="number" value={value ?? ''} {...handle(onChange)} {...ro} />
     case 'boolean':
       return (
         <div className="flex gap-4">
-          <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer"><input type="radio" /> True</label>
-          <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer"><input type="radio" /> False</label>
+          {['True', 'False'].map((opt) => (
+            <label key={opt} className={`flex items-center gap-1.5 text-sm text-gray-700 ${readOnly ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+              <input type="radio" checked={value === opt} onChange={() => !readOnly && onChange(opt)} readOnly={readOnly} />
+              {opt}
+            </label>
+          ))}
         </div>
       )
     case 'date':
-      return <input className={base} type="date" />
+      return <input className={base} type="date" value={value ?? ''} {...handle(onChange)} {...ro} />
     case 'datetime':
-      return <input className={base} type="datetime-local" />
+      return <input className={base} type="datetime-local" value={value ?? ''} {...handle(onChange)} {...ro} />
     case 'choice':
       return (
-        <select className={base}>
+        <select className={base} value={value ?? ''} onChange={(e) => !readOnly && onChange(e.target.value)} disabled={readOnly}>
           <option value="">Select an option</option>
           {(field.typeConfig?.options ?? []).map((o, i) => (
-            <option key={i}>{o}</option>
+            <option key={i} value={o}>{o}</option>
           ))}
         </select>
       )
     case 'reference':
     case 'multi_reference':
-      return (
-        <input
-          className={base}
-          type="text"
-          placeholder={`Search ${field.typeConfig?.table ?? 'records'}…`}
-        />
-      )
+      return <input className={base} type="text" value={value ?? ''} {...handle(onChange)} {...ro} placeholder={`Search ${field.typeConfig?.table ?? 'records'}…`} />
     case 'html':
-      return (
-        <div
-          className="text-sm text-gray-700"
-          dangerouslySetInnerHTML={{ __html: field.typeConfig?.content ?? '' }}
-        />
-      )
+      return <div className="text-sm text-gray-700" dangerouslySetInnerHTML={{ __html: field.typeConfig?.content ?? '' }} />
     case 'acknowledgement':
       return (
-        <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
-          <input type="checkbox" className="mt-0.5" />
+        <label className={`flex items-start gap-2 text-sm text-gray-700 ${readOnly ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+          <input type="checkbox" className="mt-0.5" checked={!!value} onChange={(e) => !readOnly && onChange(e.target.checked)} readOnly={readOnly} />
           <span>{field.typeConfig?.statementText ?? 'I acknowledge…'}</span>
         </label>
       )
     default:
-      return <input className={base} type="text" />
+      return <input className={base} type="text" value={value ?? ''} {...handle(onChange)} {...ro} />
   }
 }
 
-function PreviewField({ field }) {
+function PreviewField({ field, showNotes, value, onChange, values }) {
+  const { visible, readonly } = evalField(field, values)
+  if (!visible) return null
+
   const isDisplayOnly = field.type === 'html'
   return (
-    <div className="flex flex-col gap-1">
+    <div className={`flex flex-col gap-1 transition-opacity ${readonly ? 'opacity-75' : ''}`}>
       {!isDisplayOnly && (
-        <label className="text-sm font-medium text-gray-700">
+        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           {field.label || <span className="italic text-gray-400">Untitled field</span>}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
+          {field.required && <span className="text-red-500">*</span>}
+          {readonly && <span className="text-xs text-gray-400 font-normal bg-gray-100 px-1.5 py-0.5 rounded">read-only</span>}
         </label>
       )}
-      {field.helpText && (
-        <p className="text-xs text-gray-500">{field.helpText}</p>
+      {field.helpText && <p className="text-xs text-gray-500">{field.helpText}</p>}
+      <FieldInput field={field} value={value} onChange={onChange} readOnly={readonly} />
+      {showNotes && field.notes && (
+        <div className="mt-1 flex gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2">
+          <span className="mt-0.5 shrink-0 w-1.5 h-1.5 rounded-full bg-amber-400" />
+          <p className="text-xs text-amber-900 whitespace-pre-wrap leading-relaxed">{field.notes}</p>
+        </div>
       )}
-      <FieldInput field={field} />
     </div>
   )
 }
@@ -126,6 +136,11 @@ function NotesFlyover({ item }) {
 
 export default function Preview() {
   const { item, showNotes } = useStore()
+  const [values, setValues] = useState({})
+
+  function setValue(fieldId, val) {
+    setValues((prev) => ({ ...prev, [fieldId]: val }))
+  }
 
   return (
     <main className="relative flex-1 overflow-y-auto p-6 bg-gray-100">
@@ -150,7 +165,14 @@ export default function Preview() {
                   <p className="text-sm text-gray-400 italic">No fields in this section</p>
                 ) : (
                   section.fields.map((field) => (
-                    <PreviewField key={field.id} field={field} />
+                    <PreviewField
+                      key={field.id}
+                      field={field}
+                      showNotes={showNotes}
+                      value={values[field.id]}
+                      onChange={(val) => setValue(field.id, val)}
+                      values={values}
+                    />
                   ))
                 )}
               </div>
